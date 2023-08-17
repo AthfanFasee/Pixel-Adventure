@@ -7,8 +7,10 @@ import 'package:pixel_adventure/levels/level.dart';
 
 class PixelAdventure extends FlameGame {
   // A trick to remove 2 black side borders by
-  // setting the game background color to a specific value to blend seamlessly with the game world's background.
+  // setting the game's background color to a specific value to blend seamlessly with the game world's background.
   @override
+  // An arrow function which returns an instance of the Color class.
+  // Determines the background color of the game screen.
   Color backgroundColor() => const Color(0xFF211F30);
 
   late final CameraComponent cam;
