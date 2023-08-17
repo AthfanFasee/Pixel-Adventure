@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
+import 'package:pixel_adventure/actors/player.dart';
 import 'package:pixel_adventure/levels/level.dart';
 
 // HasKeyboardHandlerComponents is like some of the components (player component) wants to use keyboard control.
@@ -16,12 +17,14 @@ class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents {
   Color backgroundColor() => const Color(0xFF211F30);
 
   late final CameraComponent cam;
-  final world = Level(levelName: 'level-02');
+  Player player = Player(character: 'Mask Dude');
 
   @override
   FutureOr<void> onLoad() async {
     // Load all images into cache(memory).
     await images.loadAllImages();
+
+    final world = Level(player: player, levelName: 'level-02');
 
     // Initialize the game camera with a fixed resolution. This resolution defines the size of the "window" through which we see the game world.
     cam = CameraComponent.withFixedResolution(

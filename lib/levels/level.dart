@@ -6,7 +6,8 @@ import 'package:pixel_adventure/actors/player.dart';
 
 class Level extends World {
   final String levelName;
-  Level({required this.levelName});
+  final Player player;
+  Level({required this.levelName, required this.player});
   late TiledComponent level;
 
   // This will run when the level is being loaded.
@@ -25,10 +26,8 @@ class Level extends World {
     for (final spawnPoint in spawnPointLayer!.objects) {
       switch (spawnPoint.class_) {
         case 'Player':
-          // Add player to this specific level in specific spawn location.
-          final player = Player(
-              character: 'Mask Dude',
-              position: Vector2(spawnPoint.x, spawnPoint.y));
+          // Add player to specific spawn location.
+          player.position = Vector2(spawnPoint.x, spawnPoint.y);
           add(player);
           break;
         default:
