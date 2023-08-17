@@ -14,10 +14,13 @@ class PixelAdventure extends FlameGame {
   Color backgroundColor() => const Color(0xFF211F30);
 
   late final CameraComponent cam;
-  final world = Level();
+  final world = Level(levelName: 'level-02');
 
   @override
-  FutureOr<void> onLoad() {
+  FutureOr<void> onLoad() async {
+    // Load all images into cache(memory).
+    await images.loadAllImages();
+
     // Initialize the game camera with a fixed resolution. This resolution defines the size of the "window" through which we see the game world.
     cam = CameraComponent.withFixedResolution(
         world: world, width: 640, height: 360);
@@ -26,6 +29,7 @@ class PixelAdventure extends FlameGame {
 
     // Add the camera and game level to the game's components. These will be rendered and updated in the game loop.
     addAll([cam, world]);
+
     return super.onLoad();
   }
 }
