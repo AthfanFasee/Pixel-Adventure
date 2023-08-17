@@ -3,9 +3,11 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flame/input.dart';
 import 'package:pixel_adventure/levels/level.dart';
 
-class PixelAdventure extends FlameGame {
+// HasKeyboardHandlerComponents is like some of the components (player component) wants to use keyboard control.
+class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents {
   // A trick to remove 2 black side borders by
   // setting the game's background color to a specific value to blend seamlessly with the game world's background.
   @override
