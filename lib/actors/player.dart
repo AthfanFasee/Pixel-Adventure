@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:pixel_adventure/pixel_adventure.dart';
 
-// Enum to define possible states of the player.
 enum PlayerState { idle, running }
+
+enum PlayerDirection { left, right, none }
 
 // Which class we extend from depens on scenario.
 // SpriteAnimationGroupComponent helps easily switching between a lot of animations (states like running, jumping).
@@ -20,11 +21,22 @@ class Player extends SpriteAnimationGroupComponent
   late final SpriteAnimation runAnimation;
   final double stepTime = 0.05;
 
+  PlayerDirection playerDirection = PlayerDirection.left;
+  double movementSpeed = 100;
+  Vector2 velocity = Vector2.zero();
+  bool isFacingRight = true;
+
   @override
   FutureOr<void> onLoad() {
     // _ means private method (only used in this class itself (or library) just as something which makes code clean).
     _loadAllAnimations();
     return super.onLoad();
+  }
+
+  @override
+  void update(double dt) {
+    _updatePlayerMovement(dt);
+    super.update(dt);
   }
 
   // Load and set up the animations that the `Player` class will use.
@@ -51,5 +63,34 @@ class Player extends SpriteAnimationGroupComponent
             amount: amount,
             stepTime: stepTime,
             textureSize: Vector2.all(32)));
+  }
+
+  void _updatePlayerMovement(double dt) {
+    double directionX = 0.0;
+    switch (playerDirection) {
+      case PlayerDirection.left:
+        if (isFacingRight) {
+          flipHorizontallyAroundCenter();
+          isFacingRight = false;
+        }
+        current = PlayerState.running;
+        directionX -= movementSpeed;
+        break;
+      case PlayerDirection.right:
+        if (!isFacingRight) {
+          flipHorizontallyAroundCenter();
+          isFacingRight = true;
+        }
+        current = PlayerState.running;
+        directionX += movementSpeed;
+        break;
+      case PlayerDirection.none:
+        current = PlayerState.idle;
+        break;
+      default:
+    }
+
+    velocity = Vector2(directionX, 0.0);
+    position += velocity * dt;
   }
 }
