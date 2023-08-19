@@ -24,7 +24,7 @@ class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents {
     // Load all images into cache(memory).
     await images.loadAllImages();
 
-    final world = Level(player: player, levelName: 'level-02');
+    final world = Level(player: player, levelName: 'level-01');
 
     // Initialize the game camera with a fixed resolution. This resolution defines the size of the "window" through which we see the game world.
     cam = CameraComponent.withFixedResolution(
