@@ -30,6 +30,7 @@ class Player extends SpriteAnimationGroupComponent
   double movementSpeed = 100;
   Vector2 velocity = Vector2.zero();
   List<CollisionBlock> collisionBlocks = [];
+  bool isOnGround = false;
 
   @override
   FutureOr<void> onLoad() {
@@ -44,6 +45,7 @@ class Player extends SpriteAnimationGroupComponent
     _updatePlayerMovement(dt);
     _checkHorizontalCollisions();
     _applyGravity(dt);
+    _checkVerticalCollisions();
     super.update(dt);
   }
 
@@ -116,10 +118,12 @@ class Player extends SpriteAnimationGroupComponent
           if (velocity.x > 0) {
             velocity.x = 0;
             position.x = block.x - width;
+            break;
           }
           if (velocity.x < 0) {
             velocity.x = 0;
             position.x = block.x + block.width + width;
+            break;
           }
         }
       }
@@ -130,5 +134,28 @@ class Player extends SpriteAnimationGroupComponent
     velocity.y += _gravity;
     velocity.y = velocity.y.clamp(-_jumpForce, _terminalVelocity);
     position.y += velocity.y * dt;
+  }
+
+  void _checkVerticalCollisions() {
+    for (final block in collisionBlocks) {
+      if (block.isPlatform) {
+        // Handle platform
+      } else {
+        if (checkCollision(this, block)) {
+          // velocity.y > 0 means we are falling
+          if (velocity.y > 0) {
+            velocity.y = 0;
+            position.y = block.y - width;
+            isOnGround = true;
+            break;
+          }
+          // velocity.y < 0 means player is above the ground (jumping).
+          if (velocity.y < 0) {
+            velocity.y = 0;
+            position.y = block.y + block.height;
+          }
+        }
+      }
+    }
   }
 }
