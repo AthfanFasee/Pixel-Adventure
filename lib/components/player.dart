@@ -23,6 +23,9 @@ class Player extends SpriteAnimationGroupComponent
   late final SpriteAnimation runAnimation;
   final double stepTime = 0.05;
 
+  final double _gravity = 10;
+  final double _jumpForce = 450;
+  final double _terminalVelocity = 300;
   double horizontalMovement = 0;
   double movementSpeed = 100;
   Vector2 velocity = Vector2.zero();
@@ -40,6 +43,7 @@ class Player extends SpriteAnimationGroupComponent
     _updatePlayerState();
     _updatePlayerMovement(dt);
     _checkHorizontalCollisions();
+    _applyGravity(dt);
     super.update(dt);
   }
 
@@ -120,5 +124,11 @@ class Player extends SpriteAnimationGroupComponent
         }
       }
     }
+  }
+
+  void _applyGravity(double dt) {
+    velocity.y += _gravity;
+    velocity.y = velocity.y.clamp(-_jumpForce, _terminalVelocity);
+    position.y += velocity.y * dt;
   }
 }
