@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame_tiled/flame_tiled.dart';
+import 'package:pixel_adventure/components/background_tile.dart';
 import 'package:pixel_adventure/components/collision_block.dart';
 import 'package:pixel_adventure/components/player.dart';
+import 'package:pixel_adventure/pixel_adventure.dart';
 
-class Level extends World {
+class Level extends World with HasGameRef<PixelAdventure> {
   final String levelName;
   final Player player;
   Level({required this.levelName, required this.player});
@@ -21,6 +23,37 @@ class Level extends World {
     level = await TiledComponent.load('$levelName.tmx', Vector2.all(16));
     // Add the loaded level to the game's components to be rendered and updated
     add(level);
+
+    _scrollingBackground();
+    _spawningObjects();
+    _addCollisions();
+
+    // Make sure to call the onLoad method on the class we inherit from, at the end.
+    return super.onLoad();
+  }
+
+  void _scrollingBackground() {
+    final backgroundLayer = level.tileMap.getLayer('Background');
+    const tileSize = 64;
+
+    final numOfTilesY = (game.size.y / tileSize).floor();
+    final numOfTilesX = (game.size.x / tileSize).floor();
+
+    if (backgroundLayer != null) {
+      final backgroundColor =
+          backgroundLayer.properties.getValue('BackgroundColor');
+      for (double y = 0; y < numOfTilesY; y++) {
+        for (double x = 0; x < numOfTilesX; x++) {
+          final backgroundTile = BackgroundTile(
+              color: backgroundColor ?? 'Gray',
+              position: Vector2(x * tileSize, y * tileSize - tileSize));
+          add(backgroundTile);
+        }
+      }
+    }
+  }
+
+  void _spawningObjects() {
     // getLayer is a method that can fetch a layer of any type from the tile map.
     // <ObjectGroup> is a generic type argument. By using this, you're specifically telling the getLayer method that you expect it to return a layer that contains objects (like spawn points) and not just tiles.
     final spawnPointLayer = level.tileMap.getLayer<ObjectGroup>('Spawnpoints');
@@ -37,7 +70,9 @@ class Level extends World {
         }
       }
     }
+  }
 
+  void _addCollisions() {
     final collisionsLayer = level.tileMap.getLayer<ObjectGroup>('Collisions');
 
     if (collisionsLayer != null) {
@@ -63,7 +98,5 @@ class Level extends World {
       }
     }
     player.collisionBlocks = collisionBlocks;
-    // Make sure to call the onLoad method on the class we inherit from, at the end.
-    return super.onLoad();
   }
 }
