@@ -6,7 +6,7 @@ import 'package:pixel_adventure/components/collision_block.dart';
 import 'package:pixel_adventure/components/utils.dart';
 import 'package:pixel_adventure/pixel_adventure.dart';
 
-enum PlayerState { idle, running }
+enum PlayerState { idle, running, jumping, falling }
 
 // Which class we extend from depens on scenario.
 // SpriteAnimationGroupComponent helps easily switching between a lot of animations (states like running, jumping).
@@ -19,9 +19,11 @@ class Player extends SpriteAnimationGroupComponent
   // If no character is passed via constructor Ninja Frog will be used as default.
   Player({position, this.character = 'Ninja Frog'}) : super(position: position);
 
+  final double stepTime = 0.05;
   late final SpriteAnimation idleAnimation;
   late final SpriteAnimation runAnimation;
-  final double stepTime = 0.05;
+  late final SpriteAnimation jumpAnimation;
+  late final SpriteAnimation fallAnimation;
 
   final double _gravity = 10;
   final double _jumpForce = 450;
@@ -69,11 +71,15 @@ class Player extends SpriteAnimationGroupComponent
   void _loadAllAnimations() {
     idleAnimation = _spriteAnimation('Idle', 11);
     runAnimation = _spriteAnimation('Run', 12);
+    jumpAnimation = _spriteAnimation('Jump', 1);
+    fallAnimation = _spriteAnimation('Fall', 1);
 
     // List of all animations.
     animations = {
       PlayerState.idle: idleAnimation,
-      PlayerState.running: runAnimation
+      PlayerState.running: runAnimation,
+      PlayerState.jumping: jumpAnimation,
+      PlayerState.falling: fallAnimation,
     };
     // Set current animation.
     current = PlayerState.running;
@@ -105,7 +111,10 @@ class Player extends SpriteAnimationGroupComponent
 
     // If moving, set player state to running
     if (velocity.x > 0 || velocity.x < 0) playerState = PlayerState.running;
-
+    // If falling, set player state to falling
+    if (velocity.y > 0) playerState = PlayerState.falling;
+    // If jumping, set player state to jumping
+    if (velocity.y < 0) playerState = PlayerState.jumping;
     current = playerState;
   }
 
