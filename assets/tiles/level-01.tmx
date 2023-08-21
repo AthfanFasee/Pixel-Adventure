@@ -33,7 +33,7 @@
  </layer>
  <objectgroup id="2" name="Spawnpoints">
   <object id="1" name="Player" type="Player" x="303.334" y="272.666" width="32" height="31.3333"/>
-  <object id="23" name="Banana" type="Fruit" x="96" y="96" width="32" height="32"/>
+  <object id="23" name="Bananas" type="Fruit" x="96" y="96" width="32" height="32"/>
   <object id="24" name="Orange" type="Fruit" x="96" y="144" width="32" height="32"/>
   <object id="25" name="Apple" type="Fruit" x="96" y="192" width="32" height="32"/>
   <object id="26" name="Apple" type="Fruit" x="192" y="160" width="32" height="32"/>

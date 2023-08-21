@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "level-01.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -13,11 +13,11 @@
             "scaleInDock": 1
         },
         "level-01.tmx": {
-            "scale": 1,
-            "selectedLayer": 0,
+            "scale": 1.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 343.5,
-                "y": 183
+                "x": 316.66666666666663,
+                "y": 180.66666666666663
             }
         }
     },
@@ -28,6 +28,7 @@
     "map.tileWidth": 16,
     "map.width": 40,
     "openFiles": [
+        "level-01.tmx"
     ],
     "project": "PixelAdventure.tiled-project",
     "recentFiles": [

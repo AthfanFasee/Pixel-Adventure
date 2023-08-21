@@ -8,7 +8,8 @@ import 'package:pixel_adventure/components/player.dart';
 import 'package:pixel_adventure/components/level.dart';
 
 // HasKeyboardHandlerComponents is like some of the components (player component) wants to use keyboard control.
-class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents {
+class PixelAdventure extends FlameGame
+    with HasKeyboardHandlerComponents, HasCollisionDetection {
   // A trick to remove 2 black side borders by
   // setting the game's background color to a specific value to blend seamlessly with the game world's background.
   @override
