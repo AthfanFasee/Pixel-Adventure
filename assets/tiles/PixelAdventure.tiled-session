@@ -16,8 +16,8 @@
             "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 316.66666666666663,
-                "y": 180.66666666666663
+                "x": 314,
+                "y": 179.33333333333334
             }
         }
     },
@@ -31,6 +31,7 @@
         "level-01.tmx"
     ],
     "project": "PixelAdventure.tiled-project",
+    "property.type": "float",
     "recentFiles": [
         "level-01.tmx"
     ],
