@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:pixel_adventure/components/player.dart';
 import 'package:pixel_adventure/components/level.dart';
 
@@ -38,6 +39,10 @@ class PixelAdventure extends FlameGame
 
     // Add the camera and game level to the game's components. These will be rendered and updated in the game loop.
     addAll([cam, world]);
+
+    if (playSounds) {
+      FlameAudio.bgm.play('music/bg.mp3');
+    }
 
     return super.onLoad();
   }
