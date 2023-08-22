@@ -65,6 +65,7 @@ flutter:
     - assets/tiles/
     - assets/images/Background/
     - assets/images/Terrain/
+    - assets/images/Other/
     - assets/images/Items/Fruits/
     - assets/images/Items/Checkpoints/Checkpoint/
     - assets/images/Traps/Saw/
