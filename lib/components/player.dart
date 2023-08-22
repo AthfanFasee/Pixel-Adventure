@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/services.dart';
 import 'package:pixel_adventure/components/checkpoint.dart';
 import 'package:pixel_adventure/components/collision_block.dart';
@@ -35,7 +36,7 @@ class Player extends SpriteAnimationGroupComponent
   late final SpriteAnimation disappearAnimation;
 
   final double _gravity = 10;
-  final double _jumpForce = 450;
+  final double _jumpForce = 250;
   final double _terminalVelocity = 300;
   double horizontalMovement = 0;
   double movementSpeed = 100;
@@ -48,6 +49,8 @@ class Player extends SpriteAnimationGroupComponent
   List<CollisionBlock> collisionBlocks = [];
   CustomHitbox hitbox =
       CustomHitbox(offsetX: 10, offsetY: 4, width: 14, height: 28);
+  double fixedDeltaTime = 1 / 60;
+  double accumulatedTime = 0;
 
   @override
   FutureOr<void> onLoad() {
@@ -63,12 +66,17 @@ class Player extends SpriteAnimationGroupComponent
 
   @override
   void update(double dt) {
-    if (!gotHit && !reachedCheckpoint) {
-      _updatePlayerState();
-      _updatePlayerMovement(dt);
-      _checkHorizontalCollisions();
-      _applyGravity(dt);
-      _checkVerticalCollisions();
+    accumulatedTime += dt;
+    // Make sure jumping is same in all fps.
+    while (accumulatedTime >= fixedDeltaTime) {
+      if (!gotHit && !reachedCheckpoint) {
+        _updatePlayerState();
+        _updatePlayerMovement(fixedDeltaTime);
+        _checkHorizontalCollisions();
+        _applyGravity(fixedDeltaTime);
+        _checkVerticalCollisions();
+      }
+      accumulatedTime -= fixedDeltaTime;
     }
     super.update(dt);
   }
@@ -89,13 +97,14 @@ class Player extends SpriteAnimationGroupComponent
   }
 
   @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+  void onCollisionStart(
+      Set<Vector2> intersectionPoints, PositionComponent other) {
     if (!reachedCheckpoint) {
       if (other is Fruit) other.collidedWithPlayer();
       if (other is Saw) _respawn();
       if (other is Checkpoint && !reachedCheckpoint) _reachedCheckpoint();
     }
-    super.onCollision(intersectionPoints, other);
+    super.onCollisionStart(intersectionPoints, other);
   }
 
   // Load and set up the animations that the `Player` class will use.
@@ -104,7 +113,7 @@ class Player extends SpriteAnimationGroupComponent
     runAnimation = _spriteAnimation('Run', 12);
     jumpAnimation = _spriteAnimation('Jump', 1);
     fallAnimation = _spriteAnimation('Fall', 1);
-    hitAnimation = _spriteAnimation('Hit', 7);
+    hitAnimation = _spriteAnimation('Hit', 7)..loop = false;
     appearAnimation = _specialSpriteAnimation('Appearing', 7);
     disappearAnimation = _specialSpriteAnimation('Desappearing', 7);
 
@@ -138,7 +147,10 @@ class Player extends SpriteAnimationGroupComponent
     return SpriteAnimation.fromFrameData(
         game.images.fromCache('Main Characters/$state (96x96).png'),
         SpriteAnimationData.sequenced(
-            amount: amount, stepTime: stepTime, textureSize: Vector2.all(96)));
+            amount: amount,
+            stepTime: stepTime,
+            textureSize: Vector2.all(96),
+            loop: false));
   }
 
   void _updatePlayerState() {
@@ -169,6 +181,9 @@ class Player extends SpriteAnimationGroupComponent
   }
 
   void _playerJump(double dt) {
+    if (game.playSounds) {
+      FlameAudio.play('sfx/jump.wav', volume: game.soundVolume);
+    }
     velocity.y = -_jumpForce;
     position.y += velocity.y * dt;
     isOnGround = false;
@@ -230,30 +245,37 @@ class Player extends SpriteAnimationGroupComponent
     }
   }
 
-  void _respawn() {
-    const hitDuration = Duration(milliseconds: 350);
-    const appearDuration = Duration(milliseconds: 350);
+  void _respawn() async {
+    if (game.playSounds) {
+      FlameAudio.play('sfx/hit.wav', volume: game.soundVolume);
+    }
     const canMoveDuration = Duration(milliseconds: 400);
 
     gotHit = true;
     current = PlayerState.hit;
-    Future.delayed(hitDuration, () {
-      // Make player always face right when respawn.
-      scale.x = 1;
-      // Make sure appearing animation plays in the correct position.
-      position = startingPosition - Vector2.all(32);
-      current = PlayerState.appear;
-      Future.delayed(appearDuration, () {
-        velocity = Vector2.zero();
-        position = startingPosition;
-        _updatePlayerState();
-        Future.delayed(canMoveDuration, () => gotHit = false);
-      });
-    });
+
+    // When an animation plays, wait for it to finish and then reset ticker so it can be used for other animations.
+    await animationTicker?.completed;
+    animationTicker?.reset();
+
+    // Make sure appearing animation plays in the correct position.
+    position = startingPosition - Vector2.all(32);
+    current = PlayerState.appear;
+
+    await animationTicker?.completed;
+    animationTicker?.reset();
+
+    velocity = Vector2.zero();
+    position = startingPosition;
+    _updatePlayerState();
+    Future.delayed(canMoveDuration, () => gotHit = false);
   }
 
-  void _reachedCheckpoint() {
+  void _reachedCheckpoint() async {
     reachedCheckpoint = true;
+    if (game.playSounds) {
+      FlameAudio.play('sfx/disappear.wav', volume: game.soundVolume);
+    }
     // Make sure disappear animation plays at the right spot.
     if (scale.x > 0) {
       position = position - Vector2.all(32);
@@ -262,22 +284,22 @@ class Player extends SpriteAnimationGroupComponent
     }
     current = PlayerState.dissapear;
 
-    const reachedCheckpointDuration = Duration(milliseconds: 350);
-    Future.delayed(reachedCheckpointDuration, () {
-      reachedCheckpoint = false;
-      // Player shouldn't be on screen after disappear animation plays.
-      position = Vector2.all(-640);
+    await animationTicker?.completed;
+    animationTicker?.reset();
 
-      const waitToShowText = Duration(seconds: 1);
-      Future.delayed(waitToShowText, () {
-        // Create the text box component
-        MyTextBox textBox = MyTextBox(
-            text: "You Won!",
-            position: gameRef.size / 2,
-            anchor: Anchor.centerLeft);
-        // Add the text box to the game
-        gameRef.add(textBox);
-      });
+    reachedCheckpoint = false;
+    // Player shouldn't be on screen after disappear animation plays.
+    position = Vector2.all(-640);
+
+    const waitToShowText = Duration(seconds: 1);
+    Future.delayed(waitToShowText, () {
+      // Create the text box component
+      MyTextBox textBox = MyTextBox(
+          text: "You Won!",
+          position: gameRef.size / 2,
+          anchor: Anchor.centerLeft);
+      // Add the text box to the game
+      gameRef.add(textBox);
     });
   }
 }

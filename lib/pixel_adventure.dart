@@ -19,6 +19,9 @@ class PixelAdventure extends FlameGame
 
   late final CameraComponent cam;
   Player player = Player(character: 'Mask Dude');
+  // Sounds are bugged in windows platform for now.
+  bool playSounds = false;
+  double soundVolume = 1.0;
 
   @override
   FutureOr<void> onLoad() async {

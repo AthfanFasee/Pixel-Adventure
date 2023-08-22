@@ -38,22 +38,13 @@ class Level extends World with HasGameRef<PixelAdventure> {
 
   void _addBackground() {
     final backgroundLayer = level.tileMap.getLayer('Background');
-    const tileSize = 64;
-
-    final numOfTilesY = (game.size.y / tileSize).floor();
-    final numOfTilesX = (game.size.x / tileSize).floor();
 
     if (backgroundLayer != null) {
       final backgroundColor =
           backgroundLayer.properties.getValue('BackgroundColor');
-      for (double y = 0; y < numOfTilesY; y++) {
-        for (double x = 0; x < numOfTilesX; x++) {
-          final backgroundTile = BackgroundTile(
-              color: backgroundColor ?? 'Gray',
-              position: Vector2(x * tileSize, y * tileSize - tileSize));
-          add(backgroundTile);
-        }
-      }
+      final backgroundTile = BackgroundTile(
+          color: backgroundColor ?? 'Gray', position: Vector2(0, 0));
+      add(backgroundTile);
     }
   }
 
@@ -68,6 +59,8 @@ class Level extends World with HasGameRef<PixelAdventure> {
           case 'Player':
             // Add player to specific spawn location.
             player.position = Vector2(spawnPoint.x, spawnPoint.y);
+            // Make player always spawn while facing right.
+            player.scale.x = 1;
             add(player);
             break;
           case 'Fruit':
