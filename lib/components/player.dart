@@ -8,6 +8,7 @@ import 'package:pixel_adventure/components/collision_block.dart';
 import 'package:pixel_adventure/components/custom_hitbox.dart';
 import 'package:pixel_adventure/components/fruit.dart';
 import 'package:pixel_adventure/components/saw.dart';
+import 'package:pixel_adventure/components/text_box.dart';
 import 'package:pixel_adventure/components/utils.dart';
 import 'package:pixel_adventure/pixel_adventure.dart';
 
@@ -267,8 +268,16 @@ class Player extends SpriteAnimationGroupComponent
       // Player shouldn't be on screen after disappear animation plays.
       position = Vector2.all(-640);
 
-      const waitToShowText = Duration(seconds: 3);
-      Future.delayed(waitToShowText, () {});
+      const waitToShowText = Duration(seconds: 1);
+      Future.delayed(waitToShowText, () {
+        // Create the text box component
+        MyTextBox textBox = MyTextBox(
+            text: "You Won!",
+            position: gameRef.size / 2,
+            anchor: Anchor.centerLeft);
+        // Add the text box to the game
+        gameRef.add(textBox);
+      });
     });
   }
 }
